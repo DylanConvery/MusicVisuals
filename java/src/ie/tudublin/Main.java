@@ -1,6 +1,7 @@
 package ie.tudublin;
 
 import d14124700.Visualizer;
+import example.*;
 
 public class Main {
     public static void main(String[] args) {
