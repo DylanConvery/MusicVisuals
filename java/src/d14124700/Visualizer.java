@@ -4,17 +4,22 @@ import ie.tudublin.Visual;
 import ie.tudublin.VisualException;
 
 public class Visualizer extends Visual {
-    float offs = 0;
     float circle_x;
     float circle_y;
     float circle_width = 500;
-    float ang = 0;
+    float circle_radius = circle_width / 2f;
+
+    float angle = 0;
+    int numSamples = 100;
+    float[] lerpedSamples = new float[numSamples];
+    float offs = 0;
 
     public void settings() {
         size(1000, 1000);
     }
 
     public void setup() {
+        setFrameSize(1024);
         circle_x = width / 2;
         circle_y = height / 2;
         startMinim();
@@ -27,46 +32,45 @@ public class Visualizer extends Visual {
     }
 
     public void draw() {
-        calculateAverageAmplitude();
+        background(0);
+        colorMode(HSB);
         try {
             calculateFFT();
         } catch (VisualException e) {
             e.printStackTrace();
         }
 
-        float cgap = 255 / 100 + 1;
+        float theta = TWO_PI / (float) numSamples;
+        float average = 0;
 
-        background(0);
-        colorMode(HSB);
         strokeWeight(5);
-
-        pushMatrix();
-
         stroke(100, 255, 255);
-        translate(circle_x, circle_y);
-        rotate(ang);
+        for (int i = 0; i < numSamples; i++) {
+            lerpedSamples[i] = lerp(lerpedSamples[i], fft.getBand(i), 0.2f);
 
-        int lines = 100;
-        float angle = TWO_PI / (float) lines;
-        ang += getSmoothedAmplitude() / 8.0f;
 
-        for (int i = 0; i < lines; i++) {
-            float c = ((i + offs) * cgap) % 255;
-            stroke(c, 255, 255);
+            stroke(map(i, 0, numSamples, 0, 255), 255, 255);
 
-            float x1 = (circle_width) / 2 * sin(angle * i);
-            float y1 = (circle_width) / 2 * cos(angle * i);
-            float x2 = (circle_width + 100) / 2 * sin(angle * i);
-            float y2 = (circle_width + 100) / 2 * cos(angle * i);
+            float x1 = circle_x + (circle_radius * sin(i * theta));
+            float y1 = circle_y - (circle_radius * cos(i * theta));
+            float x2 = circle_x + ((lerpedSamples[i] * circle_radius) * sin(i * theta));
+            float y2 = circle_y - ((lerpedSamples[i] * circle_radius) * cos(i * theta));
+            println("x2 : " + x2 + "\ny2 : " + y2);
             line(x1, y1, x2, y2);
         }
 
-        popMatrix();
 
         strokeWeight(20);
-        noFill();
         stroke(255, 255, 255);
-        ellipse(circle_y, circle_y, circle_width, circle_width);
+        noFill();
+        // ellipse(circle_y, circle_y, circle_width, circle_width);
 
     }
 }
+
+// x = rsin(θ), y = rcos(θ).
+
+// float x1 = (circle_width) / 2 * sin(angle * i);
+// float y1 = (circle_width) / 2 * cos(angle * i);
+// float x2 = (circle_width + 100) / 2 * sin(angle * i);
+// float y2 = (circle_width + 100) / 2 * cos(angle * i);
