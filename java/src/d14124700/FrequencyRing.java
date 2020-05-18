@@ -6,55 +6,101 @@ public class FrequencyRing {
 
     Visualizer visualizer;
 
-    float circle_x;
-    float circle_y;
-    float circle_width;
-    float circle_radius;
+    float x;
+    float y;
+    float width;
+    float radius;
 
-    int spines = 200;
-    float[] lerpedSamples = new float[spines];
+    int spines;
+    float rotation_angle;
+    float smoothedBand;
+    float border;
 
-    float rotation_angle = 0;
-
-    float x1;
-    float y1;
-    float x2;
-    float y2;
-
-    public FrequencyRing(Visualizer visualizer){
+    public FrequencyRing(Visualizer visualizer, float x, float y, float width, int spines,
+            float border) {
         this.visualizer = visualizer;
-        circle_x = visualizer.width / 2;
-        circle_y = visualizer.height / 2;
-        circle_width = visualizer.width / 5;
-        circle_radius = circle_width / 2f;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.spines = spines;
+        radius = width / 2f;
+        this.border = border;
     }
 
-    public void render(){
+    public void render() {
+        visualizer.colorMode(PApplet.HSB);
         visualizer.strokeWeight(5);
-        float theta = PApplet.TWO_PI / (float) spines;
-        float[] bands = visualizer.getSmoothedBands();
+        float theta = PApplet.TWO_PI / (float) spines; // used to draw n spines in circle
+        float[] bands = visualizer.getSmoothedBands(); // stores smoothed bands
+        float band = 0;
 
-        visualizer.translate(circle_x, circle_y);
-        visualizer.rotate(rotation_angle);
-        visualizer.pushMatrix();
+        visualizer.pushMatrix(); // store current transformation matrix
+        visualizer.translate(x, y); // set x,y as new 0,0
+        visualizer.rotate(rotation_angle); // rotate by rotation_angle amount every frame
 
         for (int i = 0; i < spines; i++) {
-            visualizer.stroke(PApplet.map(i, 0, spines, 0, 255), 255, 255);
-            float band = bands[i % bands.length];
+            float offset = 0; // used to keep spines within border boundary
+            visualizer.stroke(PApplet.map(i, 0, spines, 0, 255), 255, 255); // map i between between
+                                                                            // 0 - spines to 0 - 255
+                                                                            // to cover whole hsb
+                                                                            // color space
+            band = bands[i % bands.length]; // get band
 
-            x1 = (circle_radius * PApplet.sin(i * theta));
-            y1 = (circle_radius * PApplet.cos(i * theta));
+            // checks whether the spine will be outside our border bounder
+            if (radius + band > visualizer.width - x - border) {
+                offset = (radius + band) - (visualizer.width - x - border);
+            }
 
-            x2 = ((circle_radius + band * 0.2f) * PApplet.sin(i * theta));
-            y2 = ((circle_radius + band * 0.2f) * PApplet.cos(i * theta));
+            if (radius + band > visualizer.height - y - border) {
+                offset = (radius + band) - (visualizer.height - y - border);
+            }
+
+            // used for drawing spines.
+            // a=r*sin(thetha)
+            float x1 = (radius * PApplet.sin(i * theta));
+            float y1 = (radius * PApplet.cos(i * theta));
+            float x2 = ((radius + band - offset) * PApplet.sin(i * theta));
+            float y2 = ((radius + band - offset) * PApplet.cos(i * theta));
 
             visualizer.line(x1, y1, x2, y2);
         }
-        
-        visualizer.popMatrix();
 
-        
-
+        // rotate according to the amplitude
         rotation_angle += visualizer.getSmoothedAmplitude() / 10.0f;
+        visualizer.popMatrix();
+    }
+
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public void setY(float y) {
+        this.y = y;
+    }
+
+    public void setWidth(float width) {
+        this.width = width;
+        radius = this.width / 2f;
+    }
+
+    public void setRadius(float radius) {
+        this.radius = radius;
+        width = this.radius * 2f;
+    }
+
+    public float getX() {
+        return x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public float getWidth() {
+        return width;
+    }
+
+    public float getRadius() {
+        return radius;
     }
 }

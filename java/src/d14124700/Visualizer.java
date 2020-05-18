@@ -4,8 +4,8 @@ import ie.tudublin.Visual;
 import ie.tudublin.VisualException;
 
 public class Visualizer extends Visual {
-    
-    FrequencyRing bands_ring;
+
+    FrequencyRing freq_ring;
     AmplitudeRing amps_ring;
 
     public void settings() {
@@ -16,16 +16,23 @@ public class Visualizer extends Visual {
         startMinim();
         loadAudio("heroplanet.mp3");
         getAudioPlayer().play();
-        bands_ring = new FrequencyRing(this);
-        amps_ring = new AmplitudeRing(this);
+        freq_ring = new FrequencyRing(this, width / 2, height / 2, width / 4, 50, 10);
+        amps_ring = new AmplitudeRing(this, width / 2, height / 2, width / 10, 400f);
     }
 
     public void keyPressed() {
+        // allows for pausing and playing
+        if (getAudioPlayer().isPlaying()) {
+            getAudioPlayer().pause();
+        } else {
+            getAudioPlayer().play();
+        }
     }
 
     public void draw() {
         background(0);
         colorMode(HSB);
+        // calculates our average amplitude and is used by our objects.
         calculateAverageAmplitude();
         try {
             calculateFFT();
@@ -33,7 +40,7 @@ public class Visualizer extends Visual {
             e.printStackTrace();
         }
         calculateFrequencyBands();
-        bands_ring.render();
+        freq_ring.render();
         amps_ring.render();
     }
 }
