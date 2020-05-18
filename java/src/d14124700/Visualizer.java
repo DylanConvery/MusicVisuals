@@ -21,11 +21,13 @@ public class Visualizer extends Visual {
     }
 
     public void keyPressed() {
-        // allows for pausing and playing
-        if (getAudioPlayer().isPlaying()) {
-            getAudioPlayer().pause();
-        } else {
-            getAudioPlayer().play();
+        if (key == ' ') {
+            // allows for pausing and playing
+            if (getAudioPlayer().isPlaying()) {
+                getAudioPlayer().pause();
+            } else {
+                getAudioPlayer().play();
+            }
         }
     }
 
