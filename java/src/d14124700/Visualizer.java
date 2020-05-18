@@ -78,10 +78,11 @@ public class Visualizer extends Visual {
         popMatrix();
 
         noFill();
-        strokeWeight(1);
-        ellipse(0,0, circle_width, circle_width);
+        stroke(map(getSmoothedAmplitude(), 0, 1, 0, 255), 255, 255);
+        strokeWeight(5);
+        ellipse(0,0, circle_width - 50, circle_width - 50);
 
-        angle +=getSmoothedAmplitude() / 8.0f;
+        angle +=getSmoothedAmplitude() / 10.0f;
     }
 }
 
